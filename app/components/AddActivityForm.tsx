@@ -1,9 +1,12 @@
-import { View, Text, Button, Modal, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Switch } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import TextField from './TextField'
-import { ScrollView } from 'react-native-gesture-handler'
-import Constants from 'expo-constants'
-import { Picker } from '@react-native-picker/picker'
+import { View, Text, Button, Modal, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import TextField from './TextField';
+import { ScrollView } from 'react-native-gesture-handler';
+import { Picker } from '@react-native-picker/picker';
+import Checkbox from 'expo-checkbox';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { addDoc, collection } from 'firebase/firestore';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../../firebaseConfig';
 
 // type errors = {
 //   name: string,
@@ -13,15 +16,33 @@ import { Picker } from '@react-native-picker/picker'
 
 const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>> }) => {
 
-  const [activityType, setActivityType] = useState('')
-  const [activitySubType, setActivitySubType] = useState('')
+  const [activityType, setActivityType] = useState('');
+  const [activitySubType, setActivitySubType] = useState('');
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [activityComment, setActivityComment] = useState('');
-  const [isFixedExpense, setIsFixedExpense] = useState('')
+  const [isMonthly, setIsMonthly] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [datePickerMode, setDatePickerMode] = useState('date')
+  const [show, setShow] = useState(false);
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+
+  const onChangeDatePicker = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  }
+
+  const showMode = (currentMode: any) => {
+    setShow(true);
+    setDatePickerMode(currentMode);
+  }
+
+  const showDatePicker = () => {
+    showMode('date');
+  }
 
   useEffect(() => {
     validateForm()
@@ -44,9 +65,19 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
     setIsFormValid(Object.keys(errors).length === 0);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     if (isFormValid) {
       setShowErrors(false);
+
+      const docRef = await addDoc(collection(FIREBASE_DB, FIREBASE_AUTH.currentUser?.uid as string), {
+        activityType: activityType,
+        activitySubType: activitySubType,
+        activityName: name,
+        activityAmount: amount,
+        comment: activityComment
+      })
+      
+
       console.log('Form submitted successfully');
     } else {
       setShowErrors(true);
@@ -77,67 +108,67 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
           {activityType &&
             <>
               <View style={styles.pickerStyle}>
-              {(() => {
-                switch (activityType) {
-                  case 'enjoyment':
-                    return (
-                      <>
-                        <Picker
-                          mode='dropdown'
-                          selectedValue={activitySubType}
-                          onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
+                {(() => {
+                  switch (activityType) {
+                    case 'enjoyment':
+                      return (
+                        <>
+                          <Picker
+                            mode='dropdown'
+                            selectedValue={activitySubType}
+                            onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
                           >
-                          <Picker.Item label='Choose type' value='' />
-                          <Picker.Item label='Clothes' value='clothes' />
-                          <Picker.Item label='Food' value='food' />
-                        </Picker>
-                      </>
-                    )
+                            <Picker.Item label='Choose type' value='' />
+                            <Picker.Item label='Clothes' value='clothes' />
+                            <Picker.Item label='Food' value='food' />
+                          </Picker>
+                        </>
+                      )
                     case 'fixedExpenses':
                       return (
-                      <>
-                        <Picker
-                          mode='dropdown'
-                          selectedValue={activitySubType}
-                          onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
+                        <>
+                          <Picker
+                            mode='dropdown'
+                            selectedValue={activitySubType}
+                            onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
                           >
-                          <Picker.Item label='Choose type' value='' />
-                          <Picker.Item label='Rent/mortgage' value='rent' />
-                          <Picker.Item label='Water/heating' value='waterHeating' />
-                        </Picker>
-                      </>
-                    )
-                  case 'necessity':
-                    return (
-                      <>
-                        <Picker
-                          mode='dropdown'
-                          selectedValue={activitySubType}
-                          onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
+                            <Picker.Item label='Choose type' value='' />
+                            <Picker.Item label='Rent/mortgage' value='rent' />
+                            <Picker.Item label='Water/heating' value='waterHeating' />
+                          </Picker>
+                        </>
+                      )
+                    case 'necessity':
+                      return (
+                        <>
+                          <Picker
+                            mode='dropdown'
+                            selectedValue={activitySubType}
+                            onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
                           >
-                          <Picker.Item label='Choose type' value='' />
-                          <Picker.Item label='Clothes' value='clothes' />
-                          <Picker.Item label='Groceries' value='groceries' />
-                        </Picker>
-                      </>
-                    )
-                  case 'income':
-                    return (
-                      <>
-                        <Picker
-                          mode='dropdown'
-                          selectedValue={activitySubType}
-                          onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
+                            <Picker.Item label='Choose type' value='' />
+                            <Picker.Item label='Clothes' value='clothes' />
+                            <Picker.Item label='Groceries' value='groceries' />
+                          </Picker>
+                        </>
+                      )
+                    case 'income':
+                      return (
+                        <>
+                          <Picker
+                            mode='dropdown'
+                            selectedValue={activitySubType}
+                            onValueChange={(itemValue, itemIndex) => setActivitySubType(itemValue)}
                           >
-                          <Picker.Item label='Choose type' value='' />
-                          <Picker.Item label='Miscellaneous' value='misc' />
-                          <Picker.Item label='Salary' value='salary' />
-                        </Picker>
-                      </>
-                    )
+                            <Picker.Item label='Choose type' value='' />
+                            <Picker.Item label='Miscellaneous' value='misc' />
+                            <Picker.Item label='Salary' value='salary' />
+                          </Picker>
+                        </>
+                      )
                   }
                 })()}
-                </View>
+              </View>
 
               <TextField
                 style={styles.textField}
@@ -165,7 +196,27 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
                 maxLength={127}
               />
 
-              <Switch />
+              <View style={styles.row}>
+                <Text style={styles.checkboxText}>Repeat monthly</Text>
+                <Checkbox
+                  style={styles.checkboxStyle}
+                  value={isMonthly}
+                  onValueChange={setIsMonthly}
+                  color={isMonthly ? '#4630EB' : undefined}
+                />
+              </View>
+              <View style={{marginVertical: 5}}>
+                <Text style={styles.checkboxText}>Date</Text>
+                <Button onPress={showDatePicker} title={date.toLocaleDateString()} />
+              </View>
+              {show && (
+                <DateTimePicker
+                  value={date}
+                  mode={datePickerMode as any}
+                  is24Hour={true}
+                  onChange={onChangeDatePicker}
+                />
+              )}
 
               <TouchableOpacity
                 style={[styles.button, { opacity: isFormValid ? 1 : 0.5 }]}
@@ -186,8 +237,8 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
             </Text>
           ))}
         </KeyboardAvoidingView>
-      </Modal>
-    </View>
+      </Modal >
+    </View >
   )
 }
 
@@ -221,7 +272,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: 'green',
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 20,
     alignItems: 'center',
     marginTop: 16,
     marginBottom: 12,
@@ -236,6 +287,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 10,
     borderRadius: 6,
+  },
+  checkboxStyle: {
+    margin: 8,
+  },
+  checkboxText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  row: {
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   error: {
     color: 'red',
