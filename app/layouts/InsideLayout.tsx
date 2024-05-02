@@ -23,11 +23,12 @@ const InsideLayout = ({ navigation }: RouterProps) => {
       <Drawer.Screen
         name='HomeLayout'
         component={HomeLayout}
-        options={{
+        initialParams={{ openModal: false }}
+        options={({ navigation, route }) => ({
           headerRight: () => (
-            <FontAwesome.Button name='plus-square' onPress={() => navigation.navigate('AddNewActivity')} />
+            <FontAwesome.Button name='plus-square' />
           ),
-        }}
+        })}
       />
 
       <Drawer.Screen

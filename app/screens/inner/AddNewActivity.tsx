@@ -1,8 +1,7 @@
 import { View, Text, Modal, Button } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import InsideStack from '../../layouts/InsideLayout'
-import { NavigationProp } from '@react-navigation/native';
-import AddActivityForm from '../../components/AddActivityForm';
+// import { NavigationProp } from '@react-navigation/native';
+// import AddActivityForm from '../../components/AddActivityForm';
 
 const AddNewActivity = ({ navigation, route }: any) => {
 

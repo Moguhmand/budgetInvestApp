@@ -1,31 +1,34 @@
 import { View, Text, Button, Modal } from 'react-native'
-import React, { useState } from 'react'
-import { NavigationProp } from '@react-navigation/native';
-import { FIREBASE_AUTH } from '../../../firebaseConfig';
+import React, { useEffect, useState } from 'react'
+// import { NavigationProp, RouteProp } from '@react-navigation/native';
 import AddActivityForm from '../../components/AddActivityForm';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-interface RouterProps {
-  navigation: NavigationProp<any, any>;
-}
 
-const Home = ({ navigation }: RouterProps) => {
+// interface RouterProps {
+//   navigation: NavigationProp<any, any>;
+//   route: RouteProp<any, any>;
+// }
+
+const Home = ({ navigation, route }: any) => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
+  const drawerNavigator = navigation.getParent('Drawer')
+
+  useEffect(() => {
+    drawerNavigator.setOptions({
+      headerRight: () => (
+        <FontAwesome.Button name='plus-square' onPress={() => setModalVisible(!modalVisible)}/>
+      ),
+    })
+  }, [navigation])
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Modal
-        animationType='slide'
-        visible={modalVisible}
-      >
-        <View>
-          <Text>hola!</Text>
-          <AddActivityForm />
-          <Button title='Submit' onPress={() => setModalVisible(!modalVisible)} />
-        </View>
-      </Modal>
+      <AddActivityForm modalVisible={modalVisible} setModalVisible={setModalVisible}/>
 
-      <Button title='Add new Activity' onPress={() => setModalVisible(true)} />
+      <Button title='Alert' onPress={() => alert('gg')} />
     </View>
   )
 }
