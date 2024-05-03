@@ -25,6 +25,7 @@ const InsideLayout = ({ navigation }: RouterProps) => {
         component={HomeLayout}
         initialParams={{ openModal: false }}
         options={({ navigation, route }) => ({
+          headerTitle: 'Home',
           headerRight: () => (
             <FontAwesome.Button name='plus-square' />
           ),

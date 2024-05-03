@@ -5,7 +5,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../firebaseConfig';
 
 // type errors = {
@@ -20,7 +20,7 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
   const [activitySubType, setActivitySubType] = useState('');
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
-  const [activityComment, setActivityComment] = useState('');
+  // const [activityComment, setActivityComment] = useState('');
   const [isMonthly, setIsMonthly] = useState(false);
   const [date, setDate] = useState(new Date());
   const [datePickerMode, setDatePickerMode] = useState('date')
@@ -28,6 +28,15 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+
+  const setDefault = () => {
+    setActivityType('');
+    setActivitySubType('');
+    setName('');
+    setAmount('');
+    setIsMonthly(false);
+    setDate(new Date());
+  }
 
   const onChangeDatePicker = (event: any, selectedDate: any) => {
     const currentDate = selectedDate;
@@ -65,20 +74,34 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
     setIsFormValid(Object.keys(errors).length === 0);
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     if (isFormValid) {
       setShowErrors(false);
 
-      const docRef = await addDoc(collection(FIREBASE_DB, FIREBASE_AUTH.currentUser?.uid as string), {
+      const cref = collection(FIREBASE_DB, 'Users', FIREBASE_AUTH.currentUser?.uid as string, 'Activities')
+      const docRef = addDoc(cref, {
         activityType: activityType,
         activitySubType: activitySubType,
         activityName: name,
         activityAmount: amount,
-        comment: activityComment
+        // comment: activityComment,
+        isMonthly: isMonthly,
+        date: date
       })
-      
+
+      // const dref = doc(FIREBASE_DB, 'Users', FIREBASE_AUTH.currentUser?.uid as string, 'Activities', date.toLocaleDateString())
+      // const docRef = await setDoc((dref), {
+      //   activityType: activityType,
+      //   activitySubType: activitySubType,
+      //   activityName: name,
+      //   activityAmount: amount,
+      //   // comment: activityComment,
+      //   isMonthly: isMonthly,
+      // })
 
       console.log('Form submitted successfully');
+      params.setModalVisible(false);
+      setDefault();
     } else {
       setShowErrors(true);
       console.log('Form has errors. Please correct them.');
@@ -87,8 +110,15 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
 
   return (
     <View>
-      <Text>Add activity</Text>
-      <Modal animationType='slide' visible={params.modalVisible}>
+      <Modal
+        animationType='slide'
+        visible={params.modalVisible}
+        onRequestClose={() => {
+          params.setModalVisible(false)
+          setDefault()
+        }}
+      >
+
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <Text style={styles.headerText}>Add Activity</Text>
           <View style={styles.pickerStyle}>
@@ -187,14 +217,14 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
                 maxLength={15}
               />
 
-              <TextField
+              {/* <TextField
                 style={styles.textField}
                 label='Comment'
                 value={activityComment}
                 onChangeText={setActivityComment}
                 multiline={true}
                 maxLength={127}
-              />
+              /> */}
 
               <View style={styles.row}>
                 <Text style={styles.checkboxText}>Repeat monthly</Text>
@@ -205,7 +235,7 @@ const AddActivityForm = (params: { modalVisible: boolean, setModalVisible: React
                   color={isMonthly ? '#4630EB' : undefined}
                 />
               </View>
-              <View style={{marginVertical: 5}}>
+              <View style={{ marginVertical: 5 }}>
                 <Text style={styles.checkboxText}>Date</Text>
                 <Button onPress={showDatePicker} title={date.toLocaleDateString()} />
               </View>

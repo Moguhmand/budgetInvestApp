@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardA
 import React, { useState } from 'react'
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../../firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc, doc } from 'firebase/firestore';
 
 const Login = () => {
 
@@ -29,7 +29,7 @@ const Login = () => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
-      const docRef = await addDoc(collection(FIREBASE_DB, response.user.uid), {
+      const docRef = await setDoc(doc(FIREBASE_DB, 'Users', response.user.uid), {
       })
       
       //alert('Check your emails!');
