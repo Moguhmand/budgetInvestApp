@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView } from 'react-native';
+import * as React from 'react'; 
+import { useState } from 'react';
 import { FIREBASE_AUTH } from '../../firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -28,7 +29,7 @@ const Login = () => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
-      alert('Check your emails!');
+      // alert('Check your emails!');
     } catch (error: any) {
       console.log(error);
       alert('Registration failed: ' + error.message);
